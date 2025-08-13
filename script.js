@@ -39,17 +39,15 @@ let userAnswers = JSON.parse(sessionStorage.getItem("progress")) || [];
 
 // Render questions and restore answers
 function renderQuestions() {
-  questionsElement.innerHTML = ""; // Clear existing content
+  questionsElement.innerHTML = "";
 
   questions.forEach((question, i) => {
     const questionDiv = document.createElement("div");
 
-    // Add question text
     const questionText = document.createElement("p");
     questionText.textContent = question.question;
     questionDiv.appendChild(questionText);
 
-    // Add choices
     question.choices.forEach((choice) => {
       const label = document.createElement("label");
       const radio = document.createElement("input");
@@ -57,9 +55,10 @@ function renderQuestions() {
       radio.name = `question-${i}`;
       radio.value = choice;
 
-      // Restore checked choice using defaultChecked (adds [checked="true"] to HTML)
+      // Restore selection from sessionStorage
       if (userAnswers[i] === choice) {
-        radio.defaultChecked = true;
+        radio.checked = true; // This sets the property
+        radio.setAttribute("checked", "true"); // This sets the attribute for Cypress
       }
 
       // Save answer on change
@@ -77,29 +76,3 @@ function renderQuestions() {
     questionsElement.appendChild(questionDiv);
   });
 }
-
-// Submit quiz
-submitButton.addEventListener("click", () => {
-  let score = 0;
-
-  questions.forEach((q, i) => {
-    if (userAnswers[i] === q.answer) {
-      score++;
-    }
-  });
-
-  const resultText = `Your score is ${score} out of ${questions.length}.`;
-  scoreElement.textContent = resultText;
-
-  // Save score to localStorage
-  localStorage.setItem("score", score);
-});
-
-// Restore score if previously submitted
-const savedScore = localStorage.getItem("score");
-if (savedScore !== null) {
-  scoreElement.textContent = `Your score is ${savedScore} out of ${questions.length}.`;
-}
-
-// Initial render
-renderQuestions();
