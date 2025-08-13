@@ -30,12 +30,14 @@ const questions = [
   },
 ];
 
-const questionsElement = document.getElementById("questions");
-const submitButton = document.getElementById("submit");
-const scoreElement = document.getElementById("score");
-
 // Load previous answers from sessionStorage (or empty array)
 let userAnswers = JSON.parse(sessionStorage.getItem("progress")) || [];
+
+// Load last score from localStorage (if available)
+const savedScore = localStorage.getItem("score");
+if (savedScore !== null) {
+  scoreElement.textContent = `Your score is ${savedScore} out of ${questions.length}.`;
+}
 
 // Render questions and restore answers
 function renderQuestions() {
@@ -58,7 +60,7 @@ function renderQuestions() {
       // Restore selection from sessionStorage
       if (userAnswers[i] === choice) {
         radio.checked = true; // This sets the property
-        radio.setAttribute("checked", "true"); // This sets the attribute for Cypress
+        radio.setAttribute("checked", "true"); // For Cypress tests
       }
 
       // Save answer on change
@@ -76,3 +78,24 @@ function renderQuestions() {
     questionsElement.appendChild(questionDiv);
   });
 }
+
+// Handle quiz submission
+submitButton.addEventListener("click", () => {
+  let score = 0;
+  questions.forEach((q, i) => {
+    if (userAnswers[i] && userAnswers[i] === q.answer) {
+      score++;
+    }
+  });
+
+  // Display and store the score
+  scoreElement.textContent = `Your score is ${score} out of ${questions.length}.`;
+  localStorage.setItem("score", score);
+
+  // Optional: Clear sessionStorage after submission if you want fresh start next time
+  // sessionStorage.removeItem("progress");
+});
+
+// Initial render
+renderQuestions();
+
