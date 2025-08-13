@@ -34,18 +34,22 @@ const questionsElement = document.getElementById("questions");
 const submitButton = document.getElementById("submit");
 const scoreElement = document.getElementById("score");
 
-// Load user progress from session storage
+// Load previous answers from sessionStorage (or empty array)
 let userAnswers = JSON.parse(sessionStorage.getItem("progress")) || [];
 
-// Render the questions with pre-selected answers
+// Render questions and restore answers
 function renderQuestions() {
-  questionsElement.innerHTML = ""; // clear existing content
+  questionsElement.innerHTML = ""; // Clear existing content
+
   questions.forEach((question, i) => {
     const questionDiv = document.createElement("div");
+
+    // Add question text
     const questionText = document.createElement("p");
     questionText.textContent = question.question;
     questionDiv.appendChild(questionText);
 
+    // Add choices
     question.choices.forEach((choice) => {
       const label = document.createElement("label");
       const radio = document.createElement("input");
@@ -53,12 +57,12 @@ function renderQuestions() {
       radio.name = `question-${i}`;
       radio.value = choice;
 
-      // Restore saved selection
+      // Restore checked choice using defaultChecked (adds [checked="true"] to HTML)
       if (userAnswers[i] === choice) {
-        radio.checked = true;
+        radio.defaultChecked = true;
       }
 
-      // Handle selection change
+      // Save answer on change
       radio.addEventListener("change", () => {
         userAnswers[i] = choice;
         sessionStorage.setItem("progress", JSON.stringify(userAnswers));
@@ -74,7 +78,7 @@ function renderQuestions() {
   });
 }
 
-// Handle submission
+// Submit quiz
 submitButton.addEventListener("click", () => {
   let score = 0;
 
@@ -84,19 +88,18 @@ submitButton.addEventListener("click", () => {
     }
   });
 
-  // Display and save score
-  scoreElement.textContent = `Your score is ${score} out of ${questions.length}.`;
-  localStorage.setItem("score", score);
+  const resultText = `Your score is ${score} out of ${questions.length}.`;
+  scoreElement.textContent = resultText;
 
-  // Optional: clear sessionStorage if you want to reset after submission
-  // sessionStorage.removeItem("progress");
+  // Save score to localStorage
+  localStorage.setItem("score", score);
 });
 
-// Restore score from localStorage if exists
+// Restore score if previously submitted
 const savedScore = localStorage.getItem("score");
 if (savedScore !== null) {
   scoreElement.textContent = `Your score is ${savedScore} out of ${questions.length}.`;
 }
 
-// Initialize
+// Initial render
 renderQuestions();
